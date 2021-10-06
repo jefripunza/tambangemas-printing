@@ -26,12 +26,14 @@ export default class Info extends Component {
                         </div>
                     </div>
                     <div className="col-6 text-center">
-                        <a href="!#" className="btn btn-secondary" onClick={() => {
+                        <a href="!#" className="btn btn-secondary" onClick={e => {
+                            e.preventDefault();
                             this.props.onUpdate();
                         }} >Edit</a>
                     </div>
                     <div className="col-6 text-center">
-                        <a href="!#" className="btn btn-danger" onClick={() => {
+                        <a href="!#" className="btn btn-danger" onClick={e => {
+                            e.preventDefault();
                             this.props.onDelete();
                         }} >Hapus</a>
                     </div>

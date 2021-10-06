@@ -61,25 +61,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    // handle anchor button
-    document.addEventListener('click', function (event) {
-      event.preventDefault();                     // Don't navigate!
-      const anchor = event.target.closest("a");   // Find closest Anchor (or self)
-      if (!anchor) return;                        // Not found. Exit here.
-      const href = anchor.getAttribute('href');
-      const target = anchor.getAttribute('target');
-      if (String(href).startsWith("#")) {
-        const id = String(href).replaceAll("#", "");
-        if (document.getElementById(id)) {
-          document.getElementById(id).scrollIntoView({
-            behavior: 'smooth'
-          });
-        }
-      } else if (target === "_blank") {
-        window.open(href, '_blank').focus();
-      }
-    });
-
     this.refreshData()
   }
 
@@ -145,12 +126,7 @@ class App extends Component {
     if (error) {
       return error;
     } else if (!isLoaded) {
-      return <div style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}>
+      return <div className="auto-center">
         <Loading
           size={50}
           fontSize={20}
@@ -164,14 +140,16 @@ class App extends Component {
             <div className="col-12">
               <div className="row">
                 {item.length === 0 ? <>
-                  <div className="col-12 col-sm-6 col-md-6 col-lg-4 text-center">
-                    <a href="!#" className="btn btn-success" onClick={() => {
+                  <div className="col-12 col-sm-6 col-md-6 col-lg-4 text-center auto-center">
+                    <a href="!#" className="btn btn-success" onClick={e => {
+                      e.preventDefault();
                       this.modalInsert();
                     }} >Tambah</a>
                   </div>
                 </> : <>
-                  <div className="col-6 col-sm-6 col-md-6 col-lg-4 text-center">
-                    <a href="!#" className="btn btn-success" onClick={() => {
+                  <div className="col-6 col-sm-6 col-md-6 col-lg-4 text-center auto-center">
+                    <a href="!#" className="btn btn-success" onClick={e => {
+                      e.preventDefault();
                       this.modalInsert();
                     }} >Tambah</a>
                   </div>
