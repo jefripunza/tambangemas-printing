@@ -183,11 +183,18 @@ class App extends Component {
                   <div class="input-group">
                     <div class="input-group-text"><i class="bi bi-search"></i></div>
                     <input type="text" class="form-control" placeholder="Cari..." onChange={e => {
-                      this.setState({
-                        view: item.filter(v => {
-                          return String(v.nama).includes(e.target.value)
-                        }),
-                      })
+                      const value = e.target.value;
+                      if (String(value).length > 0) {
+                        this.setState({
+                          view: item.filter(v => {
+                            return String(v.nama).toLowerCase().includes(String(value).toLowerCase())
+                          }),
+                        })
+                      }else{
+                        this.setState({
+                          view: item,
+                        })
+                      }
                     }} />
                   </div>
                 </div>
