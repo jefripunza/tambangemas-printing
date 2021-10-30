@@ -1,12 +1,49 @@
-const path = require("path");
-const { Database } = require("./advance-json-database");
+const { config } = require("../../config");
+const { insertDocument, showCollection, deleteDocument, updateDocumentByObject, updateDocumentByID } = require("./ModelMongoDB");
 
-const databaseItem = new Database(path.join(__dirname, "database", "item.json"), [{
-    nama: "pensil",
-    harga: 1500,
-    keuntungan: 300,
-}], true);
+/**
+ * 
+ * @returns 
+ */
+async function readItem() {
+    return (await showCollection(config.mongodb.database, ["item"])).item
+}
+
+/**
+ * 
+ * @param {{nama:string, harga:number, keuntungan:number}} item 
+ * @returns 
+ */
+async function tambahItem(item) {
+    return await insertDocument(config.mongodb.database, "item", {
+        ...item,
+    })
+}
+
+/**
+ * 
+ * @param {string} _id 
+ * @param {{nama:string, harga:number, keuntungan:number}} item 
+ * @returns 
+ */
+async function updateItem(_id, item) {
+    return await updateDocumentByID(config.mongodb.database, "item", _id, {
+        ...item,
+    })
+}
+
+/**
+ * 
+ * @param {string} _id 
+ * @returns 
+ */
+async function deleteItem(_id) {
+    return await deleteDocument(config.mongodb.database, "item", _id)
+}
 
 module.exports = {
-    databaseItem,
-};
+    readItem,
+    tambahItem,
+    updateItem,
+    deleteItem,
+}

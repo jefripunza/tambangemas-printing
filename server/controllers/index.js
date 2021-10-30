@@ -3,8 +3,8 @@ const { public, json, errorJson } = require("../utils/response")
 const { config } = require("../../config");
 
 const {
-    databaseItem,
-} = require("../models");
+    readItem, tambahItem, updateItem, deleteItem,
+} = require("../models"); // databaseItem
 
 // ===============================================
 
@@ -14,18 +14,18 @@ exports.index = (req, res, next) => {
 
 // ===============================================
 
-exports.api_get = (req, res, next) => {
+exports.api_get = async (req, res, next) => {
     const {
         request,
     } = req.params;
     if (request === "refresh-item") {
-        return json(res, "seger!!", databaseItem.read())
+        return json(res, "seger!!", await readItem())
     } else {
         return errorJson(res, "api tidak ada...")
     }
 }
 
-exports.api_post = (req, res, next) => {
+exports.api_post = async (req, res, next) => {
     const {
         request,
     } = req.params;
@@ -37,25 +37,31 @@ exports.api_post = (req, res, next) => {
     } = req.body;
     console.log({ body: req.body });
     if (request === "insert-item") {
-        databaseItem.add({
+        if (await tambahItem({
             nama,
             harga: parseInt(harga),
             keuntungan: parseInt(keuntungan),
-        }, result => {
-            return json(res, "berhasil menambahkan item !!", result)
-        });
+        })) {
+            return json(res, "berhasil menambahkan item !!", await readItem())
+        } else {
+            return errorJson(res, "terjadi kesalahan pada database...")
+        }
     } else if (request === "update-item") {
-        databaseItem.update(_id, {
+        if (await updateItem(_id, {
             nama,
             harga: parseInt(harga),
             keuntungan: parseInt(keuntungan),
-        }, result => {
-            return json(res, "berhasil mengubah item !!", result)
-        });
+        })) {
+            return json(res, "berhasil mengubah item !!", await readItem())
+        } else {
+            return errorJson(res, "terjadi kesalahan pada database...")
+        }
     } else if (request === "delete-item") {
-        databaseItem.delete(_id, result => {
-            return json(res, "berhasil menghapus item !!", result)
-        });
+        if (await deleteItem(_id)) {
+            return json(res, "berhasil menghapus item !!", await readItem())
+        } else {
+            return errorJson(res, "terjadi kesalahan pada database...")
+        }
     } else {
         return errorJson(res, "request tidak ada...")
     }

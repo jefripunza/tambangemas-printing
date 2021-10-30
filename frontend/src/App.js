@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 
-import moment from "moment";
-import 'moment/locale/id';
-
 import {
   getRequest,
   postRequest,
@@ -22,6 +19,7 @@ import {
   createDelete,
   createModal,
   createSuccess,
+  modalLoading,
 } from "./utils/SweetAlert";
 
 import {
@@ -30,14 +28,7 @@ import {
   ModalViewItem,
 } from "./modals";
 
-import ReactExport from "react-export-excel";
-
-const ExcelFile = ReactExport.ExcelFile;
-const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
-const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
-
-moment.lang('id');
-const now_date = moment.unix(parseInt((new Date()).getTime()) / 1000).format('YYYY-MM-DD_HH-m-s_dddd');
+// https://pipeline.mediumra.re/nav-side-team.html
 
 class App extends Component {
   constructor(props) {
@@ -52,6 +43,7 @@ class App extends Component {
 
   refreshData() {
     getRequest("/api/refresh-item", hasil => {
+      console.log({ hasil });
       this.setState({
         item: hasil.data,
         view: hasil.data,
@@ -61,7 +53,26 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.refreshData()
+    this.refreshData();
+
+    // handle anchor button
+    document.addEventListener('click', function (event) {
+      event.preventDefault();                     // Don't navigate!
+      const anchor = event.target.closest("a");   // Find closest Anchor (or self)
+      if (!anchor) return;                        // Not found. Exit here.
+      const href = anchor.getAttribute('href');
+      const target = anchor.getAttribute('target');
+      if (String(href).startsWith("#")) {
+        const id = String(href).replaceAll("#", "");
+        if (document.getElementById(id)) {
+          document.getElementById(id).scrollIntoView({
+            behavior: 'smooth'
+          });
+        }
+      } else if (target === "_blank") {
+        window.open(href, '_blank').focus();
+      }
+    });
   }
 
   addItem(data) {
@@ -77,6 +88,7 @@ class App extends Component {
     })
   }
   deleteItem(data) {
+    modalLoading("sedang menghapus...")
     const {
       _id,
     } = data;
@@ -135,71 +147,26 @@ class App extends Component {
       </div>;
     } else {
       return (
-        <Container>
+        <Container
+          item={item}
+          add={() => {
+            this.modalInsert();
+          }}
+          search={value => {
+            if (String(value).length > 0) {
+              this.setState({
+                view: item.filter(v => {
+                  return String(v.nama).toLowerCase().includes(String(value).toLowerCase())
+                }),
+              })
+            } else {
+              this.setState({
+                view: item,
+              })
+            }
+          }}
+        >
           <div className="row">
-            <div className="col-12">
-              <div className="row">
-                {item.length === 0 ? <>
-                  <div className="col-12 col-sm-6 col-md-6 col-lg-4 text-center auto-center">
-                    <a href="!#" className="btn btn-success" onClick={e => {
-                      e.preventDefault();
-                      this.modalInsert();
-                    }} >Tambah</a>
-                  </div>
-                </> : <>
-                  <div className="col-6 col-sm-6 col-md-6 col-lg-4 text-center auto-center">
-                    <a href="!#" className="btn btn-success" onClick={e => {
-                      e.preventDefault();
-                      this.modalInsert();
-                    }} >Tambah</a>
-                  </div>
-                  <div className="col-6 col-sm-6 col-md-6 col-lg-4 text-center">
-                    <ExcelFile
-                      element={<button href="!#" className="btn btn-secondary" >Download</button>}
-                      filename={"Rekap_" + now_date}
-                    >
-                      <ExcelSheet
-                        data={item.sort(function (a, b) {
-                          if (a.nama < b.nama) { return -1; }
-                          if (a.nama > b.nama) { return 1; }
-                          return 0;
-                        }).map((val, i) => {
-                          val.no = i + 1;
-                          val.harga_jual = parseInt(val.harga) + parseInt(val.keuntungan);
-                          return val;
-                        })}
-                        name={"Rekap"}
-                      >
-                        <ExcelColumn label="No" value="no" />
-                        <ExcelColumn label="Nama Item" value="nama" />
-                        <ExcelColumn label="Harga Asli" value="harga" />
-                        <ExcelColumn label="Keuntungan" value="keuntungan" />
-                        <ExcelColumn label="Harga Jual" value="harga_jual" />
-                      </ExcelSheet>
-                    </ExcelFile>
-                  </div>
-                </>}
-                <div className="col-sm-12 col-md-6 col-lg-4 text-center mt-4">
-                  <div class="input-group">
-                    <div class="input-group-text"><i class="bi bi-search"></i></div>
-                    <input type="text" class="form-control" placeholder="Cari..." onChange={e => {
-                      const value = e.target.value;
-                      if (String(value).length > 0) {
-                        this.setState({
-                          view: item.filter(v => {
-                            return String(v.nama).toLowerCase().includes(String(value).toLowerCase())
-                          }),
-                        })
-                      }else{
-                        this.setState({
-                          view: item,
-                        })
-                      }
-                    }} />
-                  </div>
-                </div>
-              </div>
-            </div>
             {view
               .sort(function (a, b) {
                 if (a.nama < b.nama) { return -1; }
@@ -234,7 +201,7 @@ class App extends Component {
                 </Card>;
               })}
           </div>
-        </Container >
+        </Container>
       );
     }
   }
