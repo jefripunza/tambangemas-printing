@@ -10,7 +10,7 @@ const config = {
 
     mongodb: {
         database: "raju",
-        connection: "mongodb+srv://jefripunza:hanyaakuyangtau123@p34c3-khyrein.9fdur.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+        connection: "mongodb+srv://",
     },
 
     // system access
